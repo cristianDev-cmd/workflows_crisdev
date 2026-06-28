@@ -54,22 +54,17 @@
     },
     {
       "parameters": {
-        "operation": "fromJson",
-        "destinationKey": "json_workflow",
-        "options": {}
+        "jsCode": "const rawContent = $input.first().json.content;\nif (!rawContent) throw new Error('No hay contenido en GitHub');\nconst json_workflow = JSON.parse(rawContent);\nreturn { json_workflow, log: `OK: ${json_workflow.name}` };"
       },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1.1,
-      "position": [
-        416,
-        0
-      ],
       "id": "b4a1af6c-6d27-463e-bfd9-24e05ee773d9",
-      "name": "Extract from File"
+      "name": "Parsear JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [416, 0]
     },
     {
       "parameters": {
-        "jsCode": "const workflowName = $json.json_workflow?.name || 'desconocido';\nconst workflowId = $json.json_workflow?.id || 'sin id';\n\nconsole.log(`Actualizando workflow: ${workflowName} (${workflowId})`);\n\nreturn {\n  json_workflow: $json.json_workflow,\n  log: `✓ Workflow \"${workflowName}\" listo para actualizar`\n};"
+        "jsCode": "const wf = $json.json_workflow;\nconsole.log(`Actualizando: ${wf.name} (${wf.id})`);\nreturn { json_workflow: wf, log: `OK: ${wf.name}` };"
       },
       "id": "log-node",
       "name": "Log workflow",
