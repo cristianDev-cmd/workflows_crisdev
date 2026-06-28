@@ -13,7 +13,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "webhookId": "crear-workflow",
-      "position": [250, 300]
+      "position": [
+        250,
+        300
+      ]
     },
     {
       "parameters": {
@@ -23,7 +26,10 @@
       "name": "Filtrar nuevos",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [450, 300]
+      "position": [
+        450,
+        300
+      ]
     },
     {
       "parameters": {
@@ -41,7 +47,10 @@
       "name": "¿Archivo nuevo?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [650, 300]
+      "position": [
+        650,
+        300
+      ]
     },
     {
       "parameters": {
@@ -66,7 +75,10 @@
       "name": "Get a file",
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
-      "position": [850, 300],
+      "position": [
+        850,
+        300
+      ],
       "credentials": {
         "githubApi": {
           "id": "4FiLSMPTKoxvHLNE",
@@ -82,7 +94,10 @@
       "name": "Parsear JSON",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1050, 300]
+      "position": [
+        1050,
+        300
+      ]
     },
     {
       "parameters": {
@@ -94,7 +109,10 @@
       "name": "Crear workflow",
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
-      "position": [1250, 300],
+      "position": [
+        1250,
+        300
+      ],
       "credentials": {
         "n8nApi": {
           "id": "meI5aPZ2i7ntOQqN",
@@ -104,14 +122,30 @@
     },
     {
       "parameters": {
-        "content": "## 🆕 Workflow creado\n\n| Campo | Valor |\n|---|---|\n| Nombre | {{ $json.name }} |\n| Hora | {{ new Date().toISOString() }} |\n\nRevisalo en n8n para activarlo manualmente.",
+        "jsCode": "return {\n  status: 'sin_nuevos',\n  mensaje: 'No hay archivos JSON nuevos en este push.',\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "sin-nuevos",
+      "name": "Sin nuevos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        850,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## {{ $json.status === 'sin_nuevos' ? 'ℹ️ Sin cambios' : '🆕 Workflow creado' }}\n\n| Campo | Valor |\n|---|---|\n{{ $json.status === 'sin_nuevos' ? `| Mensaje | ${$json.mensaje} |` : `| Nombre | ${$json.name} |\\n| Hora | ${new Date().toISOString()} |\\n\\nRevisalo en n8n para activarlo manualmente.` }}\n",
         "height": 200
       },
       "id": "responder",
       "name": "Responder",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1450, 300]
+      "position": [
+        1050,
+        300
+      ]
     }
   ],
   "connections": {
@@ -148,7 +182,7 @@
         ],
         [
           {
-            "node": "Responder",
+            "node": "Sin nuevos",
             "type": "main",
             "index": 0
           }
@@ -178,6 +212,17 @@
       ]
     },
     "Crear workflow": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sin nuevos": {
       "main": [
         [
           {
