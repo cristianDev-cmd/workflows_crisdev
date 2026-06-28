@@ -54,7 +54,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json;\nlet rawContent = input.content;\n// Si viene base64\nif (input.encoding === 'base64' && !rawContent && input.raw) {\n  rawContent = Buffer.from(input.raw, 'base64').toString();\n}\nif (!rawContent) {\n  console.log('Keys:', Object.keys(input));\n  console.log('Preview:', JSON.stringify(input).substring(0,300));\n  throw new Error(`Sin contenido. Keys: ${Object.keys(input).join(', ')}`);\n}\nconst json_workflow = JSON.parse(rawContent);\nreturn { json_workflow, log: `OK: ${json_workflow.name}` };"
+        "jsCode": "// El GitHub node YA devuelve el JSON del archivo (no en .content)\nconst wf = $input.first().json;\nif (!wf || !wf.name) throw new Error('JSON inválido — falta .name');\nreturn { json_workflow: wf, log: `OK: ${wf.name}` };"
       },
       "id": "b4a1af6c-6d27-463e-bfd9-24e05ee773d9",
       "name": "Parsear JSON",
