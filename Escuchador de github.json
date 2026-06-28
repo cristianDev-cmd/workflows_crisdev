@@ -116,20 +116,6 @@
           "name": "n8n account"
         }
       }
-    },
-    {
-      "parameters": {
-        "content": "## ✅ Workflow actualizado\n\n| Campo | Valor |\n|---|---|\n| Workflow | {{ $json.json_workflow.name }} |\n| ID | {{ $json.json_workflow.id }} |\n| Hora | {{new Date().toISOString()}} |\n\n{{ $json.log }}",
-        "height": 200
-      },
-      "id": "responder-github",
-      "name": "Responder a GitHub",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        936,
-        0
-      ]
     }
   ],
   "pinData": {
@@ -391,17 +377,6 @@
         [
           {
             "node": "Info del commit",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Update a workflow": {
-      "main": [
-        [
-          {
-            "node": "Responder a GitHub",
             "type": "main",
             "index": 0
           }
