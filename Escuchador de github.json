@@ -54,7 +54,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const rawContent = $input.first().json.content;\nif (!rawContent) throw new Error('No hay contenido en GitHub');\nconst json_workflow = JSON.parse(rawContent);\nreturn { json_workflow, log: `OK: ${json_workflow.name}` };"
+        "jsCode": "// Debug: ver qué devuelve GitHub\nconst input = $input.first().json;\nconst rawContent = input.content;\n\n// Si no hay content, loguear lo que sí hay\nif (!rawContent) {\n  console.log('GitHub response:', JSON.stringify(input).substring(0,300));\n  throw new Error(`Sin contenido. Respuesta de GitHub — name: ${input.file_name || '?'}  size: ${input.size || '?'}`);\n}\n\nconst json_workflow = JSON.parse(rawContent);\nreturn { json_workflow, log: `OK: ${json_workflow.name}` };"
       },
       "id": "b4a1af6c-6d27-463e-bfd9-24e05ee773d9",
       "name": "Parsear JSON",
