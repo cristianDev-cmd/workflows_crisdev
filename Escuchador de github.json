@@ -33,7 +33,7 @@
           "cachedResultName": "workflows_crisdev",
           "cachedResultUrl": "https://github.com/cristianDev-cmd/workflows_crisdev"
         },
-        "filePath": "={{ $node[\"Webhook\"].json.body.head_commit.modified.find(file => file.endsWith('.json')) }}",
+        "filePath": "={{ \n(() => {\n  const commit = $node[\"Webhook\"].json.body?.head_commit || {};\n  const archivos = [...(commit.modified || []), ...(commit.added || [])];\n  return archivos.find(f => f.endsWith('.json')) || 'ninguno.json';\n})() \n}}",
         "additionalParameters": {}
       },
       "type": "n8n-nodes-base.github",
