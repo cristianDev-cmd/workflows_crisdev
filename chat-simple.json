@@ -35,13 +35,24 @@
     },
     {
       "parameters": {
-        "jsCode": "const msg = $input.first().json.body?.mensaje || $input.first().json.query?.mensaje || 'Hola';\nconst estado = $input.first().json.estado || 'sin estado';\n\nreturn {\n  respuesta: `Recibí tu mensaje: \"${msg}\". Estado: ${estado}. ¡El chat funciona! 🤖`,\n  timestamp: new Date().toISOString()\n};"
+        "amount": 1,
+        "unit": "seconds"
+      },
+      "id": "wait-node",
+      "name": "Pausa 1s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg = $input.first().json.body?.mensaje || $input.first().json.query?.mensaje || 'Hola';\nconst estado = $input.first().json.estado || 'sin estado';\n\nreturn {\n  respuesta: `Recibí tu mensaje: \"${msg}\". Estado: ${estado}. Pasó por 5 nodos y ¡el chat funciona! 🤖`,\n  timestamp: new Date().toISOString()\n};"
       },
       "id": "code-node",
       "name": "Procesar mensaje",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [650, 300]
+      "position": [850, 300]
     },
     {
       "parameters": {
@@ -52,7 +63,7 @@
       "name": "Responder",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [850, 300]
+      "position": [1050, 300]
     }
   ],
   "connections": {
@@ -68,6 +79,17 @@
       ]
     },
     "Agregar estado": {
+      "main": [
+        [
+          {
+            "node": "Pausa 1s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pausa 1s": {
       "main": [
         [
           {
@@ -91,7 +113,7 @@
     }
   },
   "pinData": {},
-  "versionId": "2",
+  "versionId": "3",
   "active": false,
   "settings": {
     "callerPolicy": "workflowsFromSameOwner"
