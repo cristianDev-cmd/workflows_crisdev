@@ -69,6 +69,16 @@
     },
     {
       "parameters": {
+        "jsCode": "const workflowName = $json.json_workflow?.name || 'desconocido';\nconst workflowId = $json.json_workflow?.id || 'sin id';\n\nconsole.log(`Actualizando workflow: ${workflowName} (${workflowId})`);\n\nreturn {\n  json_workflow: $json.json_workflow,\n  log: `✓ Workflow \"${workflowName}\" listo para actualizar`\n};"
+      },
+      "id": "log-node",
+      "name": "Log workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [520, 0]
+    },
+    {
+      "parameters": {
         "operation": "update",
         "workflowId": {
           "__rl": true,
@@ -81,7 +91,7 @@
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        624,
+        728,
         0
       ],
       "id": "028ad1d4-7f11-487b-9f3e-760f0cce87a3",
@@ -349,6 +359,17 @@
       ]
     },
     "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Log workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log workflow": {
       "main": [
         [
           {
