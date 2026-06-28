@@ -96,7 +96,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.first().json.content;\nif (!raw) throw new Error('Sin contenido');\nconst wf = JSON.parse(raw);\nreturn { workflow: wf, name: wf.name, log: `OK: ${wf.name}` };"
+        "jsCode": "const input = $input.first().json;\nlet raw = input.content;\n// Si viene en base64 (raw)\nif (input.encoding === 'base64' && !raw && input.raw) {\n  raw = Buffer.from(input.raw, 'base64').toString();\n}\nif (!raw) {\n  console.log('GitHub response keys:', Object.keys(input));\n  console.log('Preview:', JSON.stringify(input).substring(0, 200));\n  throw new Error(`Sin contenido. Keys: ${Object.keys(input).join(', ')}`);\n}\nconst wf = JSON.parse(raw);\nreturn { workflow: wf, name: wf.name, log: `OK: ${wf.name}` };"
       },
       "id": "parse-json",
       "name": "Parsear JSON",
