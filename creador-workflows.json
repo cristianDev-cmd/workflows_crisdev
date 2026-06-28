@@ -1,0 +1,200 @@
+{
+  "name": "Creador de workflows",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crear-workflow",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-crear",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "crear-workflow",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst archivos = body?.head_commit?.added || [];\n\n// Solo procesar si se crearon archivos JSON nuevos\nconst nuevos = archivos.filter(f => f.endsWith('.json'));\n\nif (nuevos.length === 0) {\n  return { procesar: false, log: 'No hay archivos JSON nuevos en este push' };\n}\n\nreturn {\n  procesar: true,\n  archivo: nuevos[0],\n  log: `Nuevo workflow detectado: ${nuevos[0]}`,\n  owner: body?.repository?.owner?.name,\n  repo: body?.repository?.name\n};"
+      },
+      "id": "filtrar-nuevos",
+      "name": "Filtrar nuevos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.procesar }}",
+              "operation": "equals",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-nuevo",
+      "name": "¿Archivo nuevo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "mode": "list",
+          "value": "cristianDev-cmd"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "workflows_crisdev",
+          "mode": "list",
+          "cachedResultName": "workflows_crisdev",
+          "cachedResultUrl": "https://github.com/cristianDev-cmd/workflows_crisdev"
+        },
+        "filePath": "={{ $json.archivo }}",
+        "additionalParameters": {}
+      },
+      "id": "get-file",
+      "name": "Get a file",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [850, 300],
+      "credentials": {
+        "githubApi": {
+          "id": "4FiLSMPTKoxvHLNE",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content;\nif (!raw) throw new Error('Sin contenido');\nconst wf = JSON.parse(raw);\nreturn { workflow: wf, name: wf.name, log: `OK: ${wf.name}` };"
+      },
+      "id": "parse-json",
+      "name": "Parsear JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "workflowObject": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json.workflow));\n  wf.active = false;\n  return JSON.stringify(wf);\n})() \n}}",
+        "requestOptions": {}
+      },
+      "id": "create-workflow",
+      "name": "Crear workflow",
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "n8nApi": {
+          "id": "meI5aPZ2i7ntOQqN",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🆕 Workflow creado\n\n| Campo | Valor |\n|---|---|\n| Nombre | {{ $json.name }} |\n| Hora | {{ new Date().toISOString() }} |\n\nRevisalo en n8n para activarlo manualmente.",
+        "height": 200
+      },
+      "id": "responder",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filtrar nuevos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar nuevos": {
+      "main": [
+        [
+          {
+            "node": "¿Archivo nuevo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Archivo nuevo?": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Parsear JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear JSON": {
+      "main": [
+        [
+          {
+            "node": "Crear workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear workflow": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [],
+  "versionId": "1",
+  "id": "creador-workflows"
+}
