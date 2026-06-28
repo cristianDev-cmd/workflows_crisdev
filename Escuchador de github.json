@@ -61,7 +61,10 @@
       "name": "Parsear JSON",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [416, 0]
+      "position": [
+        416,
+        0
+      ]
     },
     {
       "parameters": {
@@ -71,7 +74,23 @@
       "name": "Log workflow",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [520, 0]
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const commit = $node['Webhook'].json.body?.head_commit;\nconst archivos = commit?.modified?.join(', ') || 'ninguno';\nconst autor = commit?.author?.name || 'desconocido';\nconst msg = commit?.message || 'sin mensaje';\n\nreturn {\n  json_workflow: $json.json_workflow,\n  commit_sha: commit?.id?.substring(0,7),\n  commit_autor: autor,\n  commit_msg: msg,\n  archivos,\n  log: $json.log + ` | Commit ${commit?.id?.substring(0,7)} por ${autor}`\n};"
+      },
+      "id": "info-commit",
+      "name": "Info del commit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        300
+      ]
     },
     {
       "parameters": {
@@ -87,7 +106,7 @@
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        728,
+        832,
         0
       ],
       "id": "028ad1d4-7f11-487b-9f3e-760f0cce87a3",
@@ -108,7 +127,10 @@
       "name": "Responder a GitHub",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [936, 0]
+      "position": [
+        1040,
+        0
+      ]
     }
   ],
   "pinData": {
@@ -380,7 +402,7 @@
       "main": [
         [
           {
-            "node": "Update a workflow",
+            "node": "Info del commit",
             "type": "main",
             "index": 0
           }
@@ -392,6 +414,17 @@
         [
           {
             "node": "Responder a GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info del commit": {
+      "main": [
+        [
+          {
+            "node": "Update a workflow",
             "type": "main",
             "index": 0
           }
