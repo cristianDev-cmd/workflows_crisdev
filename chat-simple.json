@@ -88,7 +88,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
       "position": [
-        1050,
+        1250,
         300
       ]
     },
@@ -102,7 +102,28 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1250,
+        1650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "test_count",
+              "value": 3
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "test-pipeline",
+      "name": "Test CI/CD",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        1450,
         300
       ]
     }
@@ -153,6 +174,17 @@
       ]
     },
     "Agregar versión": {
+      "main": [
+        [
+          {
+            "node": "Test CI/CD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test CI/CD": {
       "main": [
         [
           {
