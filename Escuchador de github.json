@@ -116,6 +116,20 @@
           "name": "n8n account"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## 🟢 Workflow actualizado\n\n{{ $json.log }}",
+        "height": 150
+      },
+      "id": "responder-github",
+      "name": "Responder a GitHub",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        936,
+        0
+      ]
     }
   ],
   "pinData": {
@@ -399,6 +413,17 @@
         [
           {
             "node": "Log workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a workflow": {
+      "main": [
+        [
+          {
+            "node": "Responder a GitHub",
             "type": "main",
             "index": 0
           }
