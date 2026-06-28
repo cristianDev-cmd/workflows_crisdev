@@ -5,7 +5,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "crear-workflow",
-        "responseMode": "lastNode",
+        "responseMode": "responseNode",
         "options": {}
       },
       "id": "webhook-crear",
