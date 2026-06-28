@@ -1,0 +1,71 @@
+{
+  "name": "Echo test",
+  "id": "echo-test",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "echo",
+        "options": {}
+      },
+      "id": "webhook-echo",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "echo",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json.body || $input.first().json;\nreturn {\n  metodo: 'POST',\n  recibido: data,\n  timestamp: new Date().toISOString(),\n  mensaje: 'Echo OK — workflow de prueba funcionando ✅'\n};"
+      },
+      "id": "code-echo",
+      "name": "Procesar echo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "content": "## 🔄 Echo Response\n\n**Mensaje:** {{ $json.mensaje }}\n\n**Timestamp:** {{ $json.timestamp }}\n\n**Recibido:**\n```json\n{{ JSON.stringify($json.recibido, null, 2) }}\n```",
+        "height": 200
+      },
+      "id": "responder-echo",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Procesar echo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar echo": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [],
+  "versionId": "1"
+}
