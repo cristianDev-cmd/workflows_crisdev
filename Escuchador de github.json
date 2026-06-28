@@ -380,18 +380,7 @@
       "main": [
         [
           {
-            "node": "Extract from File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract from File": {
-      "main": [
-        [
-          {
-            "node": "Log workflow",
+            "node": "Parsear JSON",
             "type": "main",
             "index": 0
           }
@@ -425,6 +414,17 @@
         [
           {
             "node": "Update a workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear JSON": {
+      "main": [
+        [
+          {
+            "node": "Log workflow",
             "type": "main",
             "index": 0
           }
