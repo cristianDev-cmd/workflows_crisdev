@@ -33,7 +33,7 @@
     },
     {
       "parameters": {
-        "content": "## 🧮 Resultado\n\n**{{ $json.mensaje }}**\n\n| Campo | Valor |\n|---|---|\n| a | {{ $json.a }} |\n| b | {{ $json.b }} |\n| Suma | **{{ $json.suma }}** |\n\n*{{ $json.timestamp }}*",
+        "content": "## 🧮 Resultado\n\n**{{ $json.mensaje }}** — {{ $json.suma >= 0 ? '✅ Positivo' : '🔴 Negativo' }}\n\n| Campo | Valor |\n|---|---|\n| a | {{ $json.a }} |\n| b | {{ $json.b }} |\n| Suma | **{{ $json.suma }}** |\n| Versión | {{ $json.version }} |\n| Nodos | {{ $json.nodos }} |\n\n*{{ $json.timestamp }}*",
         "height": 200
       },
       "id": "responder-sumar",
@@ -41,7 +41,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        850,
+        1450,
         300
       ]
     },
@@ -68,7 +68,37 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3,
       "position": [
-        650,
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.suma }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "largerEqual"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-positivo",
+      "name": "¿Positivo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1050,
         300
       ]
     }
@@ -98,6 +128,24 @@
     },
     "Agregar metadatos": {
       "main": [
+        [
+          {
+            "node": "¿Positivo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Positivo?": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Responder",
