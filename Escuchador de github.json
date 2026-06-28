@@ -54,27 +54,14 @@
     },
     {
       "parameters": {
-        "jsCode": "// El GitHub node YA devuelve el JSON del archivo (no en .content)\nconst wf = $input.first().json;\nif (!wf || !wf.name) throw new Error('JSON inválido — falta .name');\nreturn { json_workflow: wf, log: `OK: ${wf.name}` };"
-      },
-      "id": "b4a1af6c-6d27-463e-bfd9-24e05ee773d9",
-      "name": "Parsear JSON",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        416,
-        0
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const wf = $json.json_workflow;\nconsole.log(`Actualizando: ${wf.name} (${wf.id})`);\nreturn { json_workflow: wf, log: `OK: ${wf.name}` };"
+        "jsCode": "const wf = $input.first().json;\nconsole.log(`Actualizando: ${wf.name} (${wf.id})`);\nreturn { json_workflow: wf, log: `OK: ${wf.name}` };"
       },
       "id": "log-node",
       "name": "Log workflow",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        520,
+        416,
         0
       ]
     },
@@ -87,7 +74,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        624,
+        520,
         300
       ]
     },
@@ -105,7 +92,7 @@
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        728,
+        624,
         0
       ],
       "id": "028ad1d4-7f11-487b-9f3e-760f0cce87a3",
@@ -127,7 +114,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        936,
+        832,
         0
       ]
     }
@@ -379,7 +366,7 @@
       "main": [
         [
           {
-            "node": "Parsear JSON",
+            "node": "Log workflow",
             "type": "main",
             "index": 0
           }
@@ -402,17 +389,6 @@
         [
           {
             "node": "Update a workflow",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parsear JSON": {
-      "main": [
-        [
-          {
-            "node": "Log workflow",
             "type": "main",
             "index": 0
           }

@@ -96,29 +96,21 @@
     },
     {
       "parameters": {
-        "jsCode": "// El output del GitHub node YA es el JSON del workflow (no viene en .content)\nconst wf = $input.first().json;\nif (!wf || !wf.name) throw new Error('JSON inválido — falta .name');\nreturn { workflow: wf, name: wf.name, log: `OK: ${wf.name}` };"
-      },
-      "id": "parse-json",
-      "name": "Parsear JSON",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1050,
-        300
-      ]
-    },
-    {
-      "parameters": {
         "operation": "create",
-        "workflowObject": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json.workflow));\n  wf.active = false;\n  return JSON.stringify(wf);\n})() \n}}",
-        "requestOptions": {}
+        "workflowObject": "={{ \n(() => {\n  const workflow = JSON.parse(JSON.stringify($json));\n  workflow.active = false;\n  return JSON.stringify(workflow);\n})() \n}}",
+        "requestOptions": {},
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        }
       },
       "id": "create-workflow",
       "name": "Crear workflow",
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        1250,
+        1050,
         300
       ],
       "credentials": {
@@ -151,7 +143,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1050,
+        1250,
         300
       ]
     }
@@ -198,17 +190,6 @@
       ]
     },
     "Get a file": {
-      "main": [
-        [
-          {
-            "node": "Parsear JSON",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parsear JSON": {
       "main": [
         [
           {
