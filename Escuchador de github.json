@@ -93,19 +93,48 @@
     },
     {
       "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "deploy_branch",
+              "value": "main"
+            },
+            {
+              "name": "deploy_hora",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "deploy_autor",
+              "value": "={{ $json.commit_autor }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-deploy-meta",
+      "name": "Metadatos deploy",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        728,
+        300
+      ]
+    },
+    {
+      "parameters": {
         "operation": "update",
         "workflowId": {
           "__rl": true,
           "value": "={{ $json.json_workflow.id }}",
           "mode": "id"
         },
-        "workflowObject": "={{ \n(() => {\n  const workflow = JSON.parse(JSON.stringify($json.json_workflow));\n  \n  // 🌟 FUERZA ACTIVO para no romper el webhook al auto-actualizarse\n  workflow.active = true;\n  \n  if (workflow.settings) {\n    const allowedSettings = {};\n    if (workflow.settings.executionTimeout !== undefined) allowedSettings.executionTimeout = workflow.settings.executionTimeout;\n    if (workflow.settings.errorWorkflow !== undefined) allowedSettings.errorWorkflow = workflow.settings.errorWorkflow;\n    if (workflow.settings.timezone !== undefined) allowedSettings.timezone = workflow.settings.timezone;\n    if (workflow.settings.saveExecutionProgress !== undefined) allowedSettings.saveExecutionProgress = workflow.settings.saveExecutionProgress;\n    workflow.settings = allowedSettings;\n  }\n\n  return JSON.stringify(workflow);\n})() \n}}",
+        "workflowObject": "={{ \n(() => {\n  const workflow = JSON.parse(JSON.stringify($json.json_workflow));\n  workflow.active = true;\n  \n  if (workflow.settings) {\n    const allowedSettings = {};\n    if (workflow.settings.executionTimeout !== undefined) allowedSettings.executionTimeout = workflow.settings.executionTimeout;\n    if (workflow.settings.errorWorkflow !== undefined) allowedSettings.errorWorkflow = workflow.settings.errorWorkflow;\n    if (workflow.settings.timezone !== undefined) allowedSettings.timezone = workflow.settings.timezone;\n    if (workflow.settings.saveExecutionProgress !== undefined) allowedSettings.saveExecutionProgress = workflow.settings.saveExecutionProgress;\n    workflow.settings = allowedSettings;\n  }\n\n  return JSON.stringify(workflow);\n})() \n}}",
         "requestOptions": {}
       },
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        832,
+        936,
         0
       ],
       "id": "028ad1d4-7f11-487b-9f3e-760f0cce87a3",
@@ -127,7 +156,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1040,
+        1144,
         0
       ]
     }
@@ -412,7 +441,7 @@
       "main": [
         [
           {
-            "node": "Update a workflow",
+            "node": "Metadatos deploy",
             "type": "main",
             "index": 0
           }
@@ -424,6 +453,17 @@
         [
           {
             "node": "Log workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Metadatos deploy": {
+      "main": [
+        [
+          {
+            "node": "Update a workflow",
             "type": "main",
             "index": 0
           }
