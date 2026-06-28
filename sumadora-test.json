@@ -1,0 +1,71 @@
+{
+  "name": "Sumadora",
+  "id": "sumadora-test",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sumar",
+        "options": {}
+      },
+      "id": "webhook-sumar",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "sumar",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst a = parseFloat(body.a) || 0;\nconst b = parseFloat(body.b) || 0;\nconst suma = a + b;\n\nreturn {\n  a, b, suma,\n  mensaje: `${a} + ${b} = ${suma}`,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "code-sumar",
+      "name": "Calcular suma",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "content": "## 🧮 Resultado\n\n**{{ $json.mensaje }}**\n\n| Campo | Valor |\n|---|---|\n| a | {{ $json.a }} |\n| b | {{ $json.b }} |\n| Suma | **{{ $json.suma }}** |\n\n*{{ $json.timestamp }}*",
+        "height": 200
+      },
+      "id": "responder-sumar",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Calcular suma",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular suma": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "tags": [],
+  "versionId": "1"
+}
