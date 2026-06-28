@@ -5,6 +5,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "7245dc71-8278-423f-beab-f64eefaaa03a",
+        "responseMode": "lastNode",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
@@ -80,7 +81,7 @@
           "value": "={{ $json.json_workflow.id }}",
           "mode": "id"
         },
-        "workflowObject": "={{ \n(() => {\n  // Hacemos una copia profunda del flujo para no romper el original en memoria\n  const workflow = JSON.parse(JSON.stringify($json.json_workflow));\n  \n  // Si tiene la sección settings, dejamos solo lo básico que la API acepta\n  if (workflow.settings) {\n    const allowedSettings = {};\n    // Conservamos solo las configuraciones estándar más comunes si existen\n    if (workflow.settings.executionTimeout !== undefined) allowedSettings.executionTimeout = workflow.settings.executionTimeout;\n    if (workflow.settings.errorWorkflow !== undefined) allowedSettings.errorWorkflow = workflow.settings.errorWorkflow;\n    if (workflow.settings.timezone !== undefined) allowedSettings.timezone = workflow.settings.timezone;\n    if (workflow.settings.saveExecutionProgress !== undefined) allowedSettings.saveExecutionProgress = workflow.settings.saveExecutionProgress;\n    \n    workflow.settings = allowedSettings;\n  }\n\n  return JSON.stringify(workflow);\n})() \n}}",
+        "workflowObject": "={{ \n(() => {\n  const workflow = JSON.parse(JSON.stringify($json.json_workflow));\n  \n  // 🌟 FUERZA ACTIVO para no romper el webhook al auto-actualizarse\n  workflow.active = true;\n  \n  if (workflow.settings) {\n    const allowedSettings = {};\n    if (workflow.settings.executionTimeout !== undefined) allowedSettings.executionTimeout = workflow.settings.executionTimeout;\n    if (workflow.settings.errorWorkflow !== undefined) allowedSettings.errorWorkflow = workflow.settings.errorWorkflow;\n    if (workflow.settings.timezone !== undefined) allowedSettings.timezone = workflow.settings.timezone;\n    if (workflow.settings.saveExecutionProgress !== undefined) allowedSettings.saveExecutionProgress = workflow.settings.saveExecutionProgress;\n    workflow.settings = allowedSettings;\n  }\n\n  return JSON.stringify(workflow);\n})() \n}}",
         "requestOptions": {}
       },
       "type": "n8n-nodes-base.n8n",
@@ -97,6 +98,17 @@
           "name": "n8n account"
         }
       }
+    },
+    {
+      "parameters": {
+        "content": "## ✅ Workflow actualizado\n\n| Campo | Valor |\n|---|---|\n| Workflow | {{ $json.json_workflow.name }} |\n| ID | {{ $json.json_workflow.id }} |\n| Hora | {{new Date().toISOString()}} |\n\n{{ $json.log }}",
+        "height": 200
+      },
+      "id": "responder-github",
+      "name": "Responder a GitHub",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [936, 0]
     }
   ],
   "pinData": {
@@ -369,6 +381,17 @@
         [
           {
             "node": "Update a workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a workflow": {
+      "main": [
+        [
+          {
+            "node": "Responder a GitHub",
             "type": "main",
             "index": 0
           }
