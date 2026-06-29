@@ -1,0 +1,192 @@
+{
+  "name": "Update de workflows",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7245dc71-8278-423f-beab-f64eefaaa03a",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7b074c8a-9b27-41c4-a5c3-abf76de96e40",
+      "name": "Webhook",
+      "webhookId": "7245dc71-8278-423f-beab-f64eefaaa03a"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "mode": "list",
+          "value": "cristianDev-cmd"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "workflows_crisdev",
+          "mode": "list",
+          "cachedResultName": "workflows_crisdev",
+          "cachedResultUrl": "https://github.com/cristianDev-cmd/workflows_crisdev"
+        },
+        "filePath": "={{ \n(() => {\n  const commit = $node[\"Webhook\"].json.body?.head_commit || {};\n  const archivos = [...(commit.modified || []), ...(commit.added || [])];\n  return archivos.find(f => f.endsWith('.json')) || 'ninguno.json';\n})() \n}}",
+        "additionalParameters": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "dc4f1ac2-62c5-466d-9318-c7c514a9d978",
+      "name": "Get a file",
+      "webhookId": "fe1e1b54-04da-4ec5-8496-2a30fa327154",
+      "credentials": {
+        "githubApi": {
+          "id": "4FiLSMPTKoxvHLNE",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const wf = $input.first().json;\nconsole.log(`Actualizando: ${wf.name} (${wf.id})`);\nreturn { json_workflow: wf, log: `OK: ${wf.name}` };"
+      },
+      "id": "log-node",
+      "name": "Log workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const commit = $node['Webhook'].json.body?.head_commit;\nconst archivos = commit?.modified?.join(', ') || 'ninguno';\nconst autor = commit?.author?.name || 'desconocido';\nconst msg = commit?.message || 'sin mensaje';\n\nreturn {\n  json_workflow: $json.json_workflow,\n  commit_sha: commit?.id?.substring(0,7),\n  commit_autor: autor,\n  commit_msg: msg,\n  archivos,\n  log: $json.log + ` | Commit ${commit?.id?.substring(0,7)} por ${autor}`\n};"
+      },
+      "id": "info-commit",
+      "name": "Info del commit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $json.json_workflow.id }}",
+          "mode": "id"
+        },
+        "workflowObject": "={{ \n(() => {\n  const workflow = JSON.parse(JSON.stringify($json.json_workflow));\n  workflow.active = true;\n  \n  if (workflow.settings) {\n    const allowedSettings = {};\n    if (workflow.settings.executionTimeout !== undefined) allowedSettings.executionTimeout = workflow.settings.executionTimeout;\n    if (workflow.settings.errorWorkflow !== undefined) allowedSettings.errorWorkflow = workflow.settings.errorWorkflow;\n    if (workflow.settings.timezone !== undefined) allowedSettings.timezone = workflow.settings.timezone;\n    if (workflow.settings.saveExecutionProgress !== undefined) allowedSettings.saveExecutionProgress = workflow.settings.saveExecutionProgress;\n    workflow.settings = allowedSettings;\n  }\n\n  return JSON.stringify(workflow);\n})() \n}}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "028ad1d4-7f11-487b-9f3e-760f0cce87a3",
+      "name": "Update a workflow",
+      "credentials": {
+        "n8nApi": {
+          "id": "meI5aPZ2i7ntOQqN",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "responder-github",
+      "name": "Responder a GitHub",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        832,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Log workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log workflow": {
+      "main": [
+        [
+          {
+            "node": "Info del commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info del commit": {
+      "main": [
+        [
+          {
+            "node": "Update a workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a workflow": {
+      "main": [
+        [
+          {
+            "node": "Responder a GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7aa1404e-093a-47b4-ad63-bc67bb3f967f",
+  "meta": {
+    "instanceId": "5bdfb1904abb29d033398c291e21acd0dd5d174d225213ee5d966130bc044c53"
+  },
+  "nodeGroups": [],
+  "id": "AG8dZtP8f4T8VcWc",
+  "tags": []
+}
