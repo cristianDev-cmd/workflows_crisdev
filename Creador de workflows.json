@@ -68,21 +68,8 @@
     },
     {
       "parameters": {
-        "jsCode": "// 1. Leemos el búfer del archivo binario llamado 'data' de forma asíncrona\nconst buffer = await this.helpers.getBinaryDataBuffer(0, 'data');\n\n// 2. Lo convertimos a texto plano (UTF-8)\nconst jsonString = buffer.toString('utf8');\n\n// 3. Parseamos el texto para convertirlo en el JSON real del workflow\nconst workflowData = JSON.parse(jsonString);\n\n// 4. Retornamos el flujo listo para crear\nreturn workflowData;"
-      },
-      "id": "192f7368-b9c4-4b31-a97b-1a28bf7dc54a",
-      "name": "Parsear JSON",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        800,
-        0
-      ]
-    },
-    {
-      "parameters": {
         "operation": "create",
-        "workflowObject": "={{ \n(() => {\n  // Clonamos el objeto para trabajar de forma segura en memoria\n  const workflow = JSON.parse(JSON.stringify($json));\n  \n  // 1. Eliminamos el ID viejo para evitar conflictos en la creación\n  delete workflow.id;\n  \n  // 2. Filtramos la sección settings dejando solo lo que la API acepta\n  if (workflow.settings) {\n    const allowedSettings = {};\n    \n    if (workflow.settings.executionTimeout !== undefined) allowedSettings.executionTimeout = workflow.settings.executionTimeout;\n    if (workflow.settings.errorWorkflow !== undefined) allowedSettings.errorWorkflow = workflow.settings.errorWorkflow;\n    if (workflow.settings.timezone !== undefined) allowedSettings.timezone = workflow.settings.timezone;\n    if (workflow.settings.saveExecutionProgress !== undefined) allowedSettings.saveExecutionProgress = workflow.settings.saveExecutionProgress;\n    \n    workflow.settings = allowedSettings;\n  }\n\n  // Retornamos el JSON limpio como string\n  return JSON.stringify(workflow);\n})() \n}}",
+        "workflowObject": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json));\n  wf.active = false;\n  return JSON.stringify(wf);\n})() \n}}",
         "requestOptions": {}
       },
       "id": "7281479b-6278-41f4-8483-c938bcc86de1",
@@ -90,7 +77,7 @@
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        1008,
+        624,
         -32
       ],
       "credentials": {
@@ -115,14 +102,15 @@
     },
     {
       "parameters": {
-        "options": {}
+        "options": {},
+        "content": "## 🆕 Workflow creado\n\nNombre: {{ $json.nuevo_name || 'desconocido' }}\nID: `{{ $json.nuevo_id }}`\n\nJSON en GitHub actualizado con el ID real."
       },
       "id": "1a16f7c1-c5fe-45a4-9a5e-b70d2dcdd552",
       "name": "Responder",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        864,
+        1456,
         256
       ]
     },
@@ -159,6 +147,55 @@
       ],
       "id": "bb7dbc05-81d8-4d6d-8cca-acd3e762f1ff",
       "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wf = $input.first().json;\nconst id = wf.id || 'sin-id';\nreturn { ...$json, nuevo_id: id, log: `ID: ${id}` };"
+      },
+      "id": "extraer-id",
+      "name": "Extraer ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "create",
+        "owner": {
+          "__rl": true,
+          "mode": "list",
+          "value": "cristianDev-cmd"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "workflows_crisdev",
+          "mode": "list",
+          "cachedResultName": "workflows_crisdev",
+          "cachedResultUrl": "https://github.com/cristianDev-cmd/workflows_crisdev"
+        },
+        "filePath": "={{ $json.archivo }}",
+        "fileContent": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json));\n  wf.id = $json.nuevo_id;\n  return JSON.stringify(wf, null, 2);\n})() \n}}",
+        "commitMessage": "={{ `fix: asigna ID real ${$json.nuevo_id}` }}",
+        "additionalParameters": {}
+      },
+      "id": "update-id-gh",
+      "name": "Actualizar ID en GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1248,
+        0
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "4FiLSMPTKoxvHLNE",
+          "name": "GitHub account"
+        }
+      }
     }
   ],
   "pinData": {
@@ -419,17 +456,6 @@
       "main": [
         [
           {
-            "node": "Parsear JSON",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parsear JSON": {
-      "main": [
-        [
-          {
             "node": "Crear workflow",
             "type": "main",
             "index": 0
@@ -441,7 +467,7 @@
       "main": [
         [
           {
-            "node": "Responder",
+            "node": "Extraer ID",
             "type": "main",
             "index": 0
           }
@@ -471,6 +497,28 @@
         [
           {
             "node": "Sin nuevos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer ID": {
+      "main": [
+        [
+          {
+            "node": "Actualizar ID en GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar ID en GitHub": {
+      "main": [
+        [
+          {
+            "node": "Responder",
             "type": "main",
             "index": 0
           }
