@@ -178,7 +178,7 @@
           "cachedResultUrl": "https://github.com/cristianDev-cmd/workflows_crisdev"
         },
         "filePath": "={{ $json.archivo }}",
-        "fileContent": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json));\n  wf.id = $json.nuevo_id;\n  return JSON.stringify(wf, null, 2);\n})() \n}}",
+        "fileContent": "={{ \n(() => {\n  // Tomamos el contenido ORIGINAL del archivo (Get a file)\n  const original = JSON.parse(JSON.stringify($node['Get a file'].json));\n  // Le asignamos el ID real que n8n devolvió\n  original.id = $json.nuevo_id;\n  return JSON.stringify(original, null, 2);\n})() \n}}",
         "commitMessage": "={{ `fix: asigna ID real ${$json.nuevo_id}` }}",
         "additionalParameters": {}
       },
