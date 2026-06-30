@@ -23,6 +23,17 @@
         250,
         0
       ]
+    },
+    {
+      "parameters": {},
+      "id": "dummy-node-1414-2",
+      "name": "No Operation 2",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        450,
+        0
+      ]
     }
   ],
   "connections": {},
