@@ -1,0 +1,50 @@
+{
+  "name": "prueba1",
+  "id": "prueba1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "prueba1",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-p1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "prueba1",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Prueba 1 OK ✅\n\nPipeline funcionando.",
+        "height": 100
+      },
+      "id": "responder-p1",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [],
+  "versionId": "1"
+}
