@@ -1,25 +1,8 @@
 {
-  "name": "prueba 10",
-  "nodes": [
-    {
-      "parameters": {},
-      "id": "10101010-1234-1234-1234-123456789abc",
-      "name": "When clicking \"Test Workflow\"",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ]
-    }
-  ],
-  "connections": {},
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "pinData": {},
-  "meta": {
-    "instanceId": "5bdfb1904abb29d033398c291e21acd0dd5d174d225213ee5d966130bc044c53"
-  },
-  "tags": []
+  "procesar": true,
+  "archivo": "prueba 10.json",
+  "log": "Nuevo workflow detectado: prueba 10.json",
+  "owner": "cristianDev-cmd",
+  "repo": "workflows_crisdev",
+  "id": "Gvh8DUWXGx53426P"
 }
