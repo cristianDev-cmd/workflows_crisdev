@@ -1,0 +1,25 @@
+{
+  "name": "prueba 7",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "77777777-1234-1234-1234-123456789abc",
+      "name": "When clicking \"Test Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "5bdfb1904abb29d033398c291e21acd0dd5d174d225213ee5d966130bc044c53"
+  },
+  "tags": []
+}
