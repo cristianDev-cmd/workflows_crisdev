@@ -20,41 +20,6 @@
     },
     {
       "parameters": {
-        "resource": "file",
-        "operation": "get",
-        "owner": {
-          "__rl": true,
-          "mode": "list",
-          "value": "cristianDev-cmd"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "workflows_crisdev",
-          "mode": "list",
-          "cachedResultName": "workflows_crisdev",
-          "cachedResultUrl": "https://github.com/cristianDev-cmd/workflows_crisdev"
-        },
-        "filePath": "={{ \n(() => {\n  const commit = $node[\"Webhook\"].json.body?.head_commit || {};\n  const archivos = [...(commit.modified || []), ...(commit.added || [])];\n  return archivos.find(f => f.endsWith('.json')) || 'ninguno.json';\n})() \n}}",
-        "additionalParameters": {}
-      },
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
-      "position": [
-        208,
-        0
-      ],
-      "id": "dc4f1ac2-62c5-466d-9318-c7c514a9d978",
-      "name": "Get a file",
-      "webhookId": "fe1e1b54-04da-4ec5-8496-2a30fa327154",
-      "credentials": {
-        "githubApi": {
-          "id": "4FiLSMPTKoxvHLNE",
-          "name": "GitHub account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "jsCode": "const wf = $input.first().json;\nconsole.log(`Actualizando: ${wf.name} (${wf.id})`);\nreturn { json_workflow: wf, log: `OK: ${wf.name}` };"
       },
       "id": "log-node",
@@ -62,7 +27,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        416,
+        500,
         0
       ]
     },
@@ -75,8 +40,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
-        304
+        650,
+        0
       ]
     },
     {
@@ -93,7 +58,7 @@
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        624,
+        800,
         0
       ],
       "id": "028ad1d4-7f11-487b-9f3e-760f0cce87a3",
@@ -114,7 +79,41 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        832,
+        950,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.github.com/repos/cristianDev-cmd/workflows_crisdev/contents/' + encodeURIComponent((() => {\n  const commit = $node[\"Webhook\"].json.body?.head_commit || {};\n  const archivos = [...(commit.modified || []), ...(commit.added || [])];\n  return archivos.find(f => f.endsWith('.json')) || 'ninguno.json';\n})()) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi"
+      },
+      "id": "get-file-from-github-update",
+      "name": "Get File from GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "4FiLSMPTKoxvHLNE",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst base64Content = $input.first().json.content;\nif (!base64Content) return $input.first().json;\n\nconst buff = Buffer.from(base64Content, 'base64');\nconst jsonStr = buff.toString('utf8');\nconst wfObj = JSON.parse(jsonStr);\n\nreturn wfObj;\n"
+      },
+      "id": "parse-workflow-update",
+      "name": "Parse Workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        350,
         0
       ]
     }
@@ -125,14 +124,25 @@
       "main": [
         [
           {
-            "node": "Get a file",
+            "node": "Get File from GitHub",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get a file": {
+    "Get File from GitHub": {
+      "main": [
+        [
+          {
+            "node": "Parse Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Workflow": {
       "main": [
         [
           {
