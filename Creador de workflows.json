@@ -33,43 +33,8 @@
     },
     {
       "parameters": {
-        "resource": "file",
-        "operation": "get",
-        "owner": {
-          "__rl": true,
-          "mode": "list",
-          "value": "cristianDev-cmd"
-        },
-        "repository": {
-          "__rl": true,
-          "value": "workflows_crisdev",
-          "mode": "list",
-          "cachedResultName": "workflows_crisdev",
-          "cachedResultUrl": "https://github.com/cristianDev-cmd/workflows_crisdev"
-        },
-        "filePath": "={{ $json.archivo }}",
-        "additionalParameters": {}
-      },
-      "id": "576b011e-57c6-4145-bb90-60fc111cd388",
-      "name": "Get a file",
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
-      "position": [
-        608,
-        0
-      ],
-      "webhookId": "d91b14e0-22bf-4c52-b2da-d54649e0086b",
-      "credentials": {
-        "githubApi": {
-          "id": "4FiLSMPTKoxvHLNE",
-          "name": "GitHub account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "operation": "create",
-        "workflowObject": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json));\n  wf.active = false;\n  return wf;\n})() \n}}",
+        "workflowObject": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json));\n  delete wf._github_sha; \n  wf.active = false;\n  return wf;\n})() \n}}",
         "requestOptions": {}
       },
       "id": "7281479b-6278-41f4-8483-c938bcc86de1",
@@ -77,8 +42,8 @@
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        624,
-        -32
+        1150,
+        0
       ],
       "credentials": {
         "n8nApi": {
@@ -110,8 +75,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1750,
-        256
+        1950,
+        0
       ]
     },
     {
@@ -157,7 +122,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1040,
+        1350,
         0
       ]
     },
@@ -177,7 +142,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 3,
       "position": [
-        1550,
+        1750,
         0
       ],
       "credentials": {
@@ -189,17 +154,16 @@
     },
     {
       "parameters": {
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "githubApi",
         "url": "={{ 'https://api.github.com/repos/cristianDev-cmd/workflows_crisdev/contents/' + encodeURIComponent($node['Filtrar nuevos'].json.archivo) }}",
-        "options": {}
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi"
       },
-      "id": "get-sha",
-      "name": "Get SHA",
+      "id": "get-file-from-github",
+      "name": "Get File from GitHub",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 3,
       "position": [
-        1200,
+        800,
         0
       ],
       "credentials": {
@@ -211,14 +175,27 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst original = JSON.parse(JSON.stringify($node['Get a file'].json));\nconst nuevo_id = $node['Extraer ID'].json.nuevo_id;\noriginal.id = nuevo_id;\n\nconst contentStr = JSON.stringify(original, null, 2);\nconst contentBase64 = Buffer.from(contentStr).toString('base64');\n\nreturn {\n  githubPayload: {\n    message: 'fix: asigna ID real ' + nuevo_id,\n    sha: $node['Get SHA'].json.sha,\n    content: contentBase64\n  }\n};\n"
+        "jsCode": "\nconst base64Content = $input.first().json.content;\nconst sha = $input.first().json.sha;\n\n// Base64 decode\nconst buff = Buffer.from(base64Content, 'base64');\nconst jsonStr = buff.toString('utf8');\nconst wfObj = JSON.parse(jsonStr);\n\n// Keep sha in the item for later use\nreturn {\n  ...wfObj,\n  _github_sha: sha\n};\n"
+      },
+      "id": "parse-workflow",
+      "name": "Parse Workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        950,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst wfObj = JSON.parse(JSON.stringify($node['Parse Workflow'].json));\nconst sha = wfObj._github_sha;\ndelete wfObj._github_sha;\n\nconst nuevo_id = $node['Extraer ID'].json.nuevo_id;\nwfObj.id = nuevo_id;\n\nconst contentStr = JSON.stringify(wfObj, null, 2);\nconst contentBase64 = Buffer.from(contentStr).toString('base64');\n\nreturn {\n  githubPayload: {\n    message: 'fix: asigna ID real ' + nuevo_id,\n    sha: sha,\n    content: contentBase64\n  }\n};\n"
       },
       "id": "prepare-payload",
       "name": "Prepare Payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1350,
+        1550,
         0
       ]
     }
@@ -470,18 +447,7 @@
       "main": [
         [
           {
-            "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get a file": {
-      "main": [
-        [
-          {
-            "node": "Crear workflow",
+            "node": "Get File from GitHub",
             "type": "main",
             "index": 0
           }
@@ -532,7 +498,7 @@
       "main": [
         [
           {
-            "node": "Get SHA",
+            "node": "Prepare Payload",
             "type": "main",
             "index": 0
           }
@@ -550,22 +516,33 @@
         ]
       ]
     },
-    "Get SHA": {
+    "Prepare Payload": {
       "main": [
         [
           {
-            "node": "Prepare Payload",
+            "node": "Actualizar ID en GitHub",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Prepare Payload": {
+    "Get File from GitHub": {
       "main": [
         [
           {
-            "node": "Actualizar ID en GitHub",
+            "node": "Parse Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Workflow": {
+      "main": [
+        [
+          {
+            "node": "Crear workflow",
             "type": "main",
             "index": 0
           }
