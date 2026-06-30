@@ -12,6 +12,17 @@
         0,
         0
       ]
+    },
+    {
+      "parameters": {},
+      "id": "dummy-node-1414",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        250,
+        0
+      ]
     }
   ],
   "connections": {},
