@@ -34,7 +34,7 @@
     {
       "parameters": {
         "operation": "create",
-        "workflowObject": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json));\n  delete wf._github_sha; \n  wf.active = false;\n  return wf;\n})() \n}}",
+        "workflowObject": "={{ \n(() => {\n  const wf = JSON.parse(JSON.stringify($json));\n  delete wf._github_sha; \n  wf.active = false;\n  return JSON.stringify(wf);\n})() \n}}",
         "requestOptions": {}
       },
       "id": "7281479b-6278-41f4-8483-c938bcc86de1",
