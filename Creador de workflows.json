@@ -163,31 +163,33 @@
     },
     {
       "parameters": {
-        "resource": "file",
-        "operation": "create",
-        "owner": {
-          "__rl": true,
-          "mode": "list",
-          "value": "cristianDev-cmd"
+        "method": "PUT",
+        "url": "={{ 'https://api.github.com/repos/cristianDev-cmd/workflows_crisdev/contents/' + encodeURIComponent($node['Filtrar nuevos'].json.archivo) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ 'fix: asigna ID real ' + $node['Extraer ID'].json.nuevo_id }}"
+            },
+            {
+              "name": "sha",
+              "value": "={{ $node['Get SHA'].json.sha }}"
+            },
+            {
+              "name": "content",
+              "value": "={{ \n(() => {\n  const original = JSON.parse(JSON.stringify($node['Get a file'].json));\n  original.id = $node['Extraer ID'].json.nuevo_id;\n  return Buffer.from(JSON.stringify(original, null, 2)).toString('base64');\n})() \n}}"
+            }
+          ]
         },
-        "repository": {
-          "__rl": true,
-          "value": "workflows_crisdev",
-          "mode": "list",
-          "cachedResultName": "workflows_crisdev",
-          "cachedResultUrl": "https://github.com/cristianDev-cmd/workflows_crisdev"
-        },
-        "filePath": "={{ $node['Filtrar nuevos'].json.archivo }}",
-        "fileContent": "={{ \n(() => {\n  const original = JSON.parse(JSON.stringify($node['Get a file'].json));\n  original.id = $node['Extraer ID'].json.nuevo_id;\n  return JSON.stringify(original, null, 2);\n})() \n}}",
-        "commitMessage": "={{ 'fix: asigna ID real ' + $node['Extraer ID'].json.nuevo_id }}",
-        "additionalParameters": {
-          "sha": "={{ $node['Get SHA'].json.sha }}"
-        }
+        "options": {}
       },
-      "id": "update-id-gh",
+      "id": "actualizar-id-http",
       "name": "Actualizar ID en GitHub",
-      "type": "n8n-nodes-base.github",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
       "position": [
         1350,
         0
