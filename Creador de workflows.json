@@ -110,7 +110,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1550,
+        1750,
         256
       ]
     },
@@ -168,22 +168,8 @@
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "githubApi",
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "message",
-              "value": "={{ 'fix: asigna ID real ' + $node['Extraer ID'].json.nuevo_id }}"
-            },
-            {
-              "name": "sha",
-              "value": "={{ $node['Get SHA'].json.sha }}"
-            },
-            {
-              "name": "content",
-              "value": "={{ \n(() => {\n  const original = JSON.parse(JSON.stringify($node['Get a file'].json));\n  original.id = $node['Extraer ID'].json.nuevo_id;\n  return Buffer.from(JSON.stringify(original, null, 2)).toString('base64');\n})() \n}}"
-            }
-          ]
-        },
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.githubPayload) }}",
         "options": {}
       },
       "id": "actualizar-id-http",
@@ -191,7 +177,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 3,
       "position": [
-        1350,
+        1550,
         0
       ],
       "credentials": {
@@ -222,6 +208,19 @@
           "name": "GitHub account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst original = JSON.parse(JSON.stringify($node['Get a file'].json));\nconst nuevo_id = $node['Extraer ID'].json.nuevo_id;\noriginal.id = nuevo_id;\n\nconst contentStr = JSON.stringify(original, null, 2);\nconst contentBase64 = Buffer.from(contentStr).toString('base64');\n\nreturn {\n  githubPayload: {\n    message: 'fix: asigna ID real ' + nuevo_id,\n    sha: $node['Get SHA'].json.sha,\n    content: contentBase64\n  }\n};\n"
+      },
+      "id": "prepare-payload",
+      "name": "Prepare Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1350,
+        0
+      ]
     }
   ],
   "pinData": {
@@ -552,6 +551,17 @@
       ]
     },
     "Get SHA": {
+      "main": [
+        [
+          {
+            "node": "Prepare Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Payload": {
       "main": [
         [
           {
