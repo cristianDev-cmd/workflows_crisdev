@@ -1,0 +1,203 @@
+{
+  "name": "Update de workflows",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7245dc71-8278-423f-beab-f64eefaaa03a",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d00433e9-a5f1-4348-85dd-b6b325380ae0",
+      "name": "Webhook",
+      "webhookId": "7245dc71-8278-423f-beab-f64eefaaa03a"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wf = $input.first().json;\nconsole.log(`Actualizando: ${wf.name} (${wf.id})`);\nreturn { json_workflow: wf, log: `OK: ${wf.name}` };"
+      },
+      "id": "006fa424-1bc7-4387-bb10-803ae3c9f4a1",
+      "name": "Log workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const commit = $node['Webhook'].json.body?.head_commit;\nconst archivos = commit?.modified?.join(', ') || 'ninguno';\nconst autor = commit?.author?.name || 'desconocido';\nconst msg = commit?.message || 'sin mensaje';\n\nreturn {\n  json_workflow: $json.json_workflow,\n  commit_sha: commit?.id?.substring(0,7),\n  commit_autor: autor,\n  commit_msg: msg,\n  archivos,\n  log: $json.log + ` | Commit ${commit?.id?.substring(0,7)} por ${autor}`\n};"
+      },
+      "id": "e2538134-4581-4966-a72d-aaf8adc96e3e",
+      "name": "Info del commit",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $json.json_workflow.id }}",
+          "mode": "id"
+        },
+        "workflowObject": "={{ \n(() => {\n  const workflow = JSON.parse(JSON.stringify($json.json_workflow));\n  workflow.active = true;\n  \n  if (workflow.settings) {\n    const allowedSettings = {};\n    if (workflow.settings.executionTimeout !== undefined) allowedSettings.executionTimeout = workflow.settings.executionTimeout;\n    if (workflow.settings.errorWorkflow !== undefined) allowedSettings.errorWorkflow = workflow.settings.errorWorkflow;\n    if (workflow.settings.timezone !== undefined) allowedSettings.timezone = workflow.settings.timezone;\n    if (workflow.settings.saveExecutionProgress !== undefined) allowedSettings.saveExecutionProgress = workflow.settings.saveExecutionProgress;\n    workflow.settings = allowedSettings;\n  }\n\n  return JSON.stringify(workflow);\n})() \n}}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        800,
+        0
+      ],
+      "id": "7994df09-8ce5-4dec-bd56-cde14875091f",
+      "name": "Update a workflow",
+      "credentials": {
+        "n8nApi": {
+          "id": "meI5aPZ2i7ntOQqN",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1a8e6817-9f08-45e3-b579-e7e402ed8c0a",
+      "name": "Responder a GitHub",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        960,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://api.github.com/repos/cristianDev-cmd/workflows_crisdev/contents/' + encodeURIComponent((() => {\n  const commit = $node[\"Webhook\"].json.body?.head_commit || {};\n  const archivos = [...(commit.modified || []), ...(commit.added || [])];\n  return archivos.find(f => f.endsWith('.json')) || 'ninguno.json';\n})()) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "ca2d6c0a-fe84-448d-bb86-e5839d3b7394",
+      "name": "Get File from GitHub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "credentials": {
+        "githubApi": {
+          "id": "4FiLSMPTKoxvHLNE",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst base64Content = $input.first().json.content;\nif (!base64Content) return $input.first().json;\n\nconst buff = Buffer.from(base64Content, 'base64');\nconst jsonStr = buff.toString('utf8');\nconst wfObj = JSON.parse(jsonStr);\n\nreturn wfObj;\n"
+      },
+      "id": "84cdcdef-4b39-46ba-a39b-1c279ae04ae5",
+      "name": "Parse Workflow",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get File from GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File from GitHub": {
+      "main": [
+        [
+          {
+            "node": "Parse Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Workflow": {
+      "main": [
+        [
+          {
+            "node": "Log workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log workflow": {
+      "main": [
+        [
+          {
+            "node": "Info del commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info del commit": {
+      "main": [
+        [
+          {
+            "node": "Update a workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a workflow": {
+      "main": [
+        [
+          {
+            "node": "Responder a GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "eb28e259-cf89-4354-bfc1-f9a9ba40260a",
+  "meta": {
+    "instanceId": "5bdfb1904abb29d033398c291e21acd0dd5d174d225213ee5d966130bc044c53"
+  },
+  "nodeGroups": [],
+  "id": "9rK1TwCA0a7FfAVv",
+  "tags": []
+}
